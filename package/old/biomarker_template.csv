@@ -1,0 +1,65 @@
+﻿information,BioData1,BioData2,BioData3
+country,United States,United States,Kenya
+country_code,USA,USA,KEN
+survey_year,2003-2016,2003-2016,2010
+complex_survey_design_yes_no,YES  ,YES  ,NO
+study_design,multi-stage cluster design,multi-stage cluster design,single-site
+data,nhanes_with_diet.csv,nhanes_with_diet.csv,kenya_data.sas7bdat
+directory,~/git/2billion/demo/bio_analysis/raw_data,~/git/2billion/demo/bio_analysis/raw_data,~/git/2billion/demo/bio_analysis/raw_data
+id,seqn,seqn,brinda_id
+strata,sdmvstra,sdmvstra,
+PSU,sdmvpsu,sdmvpsu,
+PSU_ID_nested_in_strata ID_yes_no,yes,yes,
+sex_var,riagendr,riagendr,sex
+male_value,1,1,1
+age,ridageyr,ridageyr,age_mo
+age_unit,year,year,month
+pregnancy_var,ridexprg,ridexprg,
+pregnancy_value,1,1,
+lactating_var,rhq200,rhq200,
+lactating_value,1,1,
+covariates,ridreth1 indfmin2 dmdeduc2 dmdhhsiz,ridreth1 indfmin2 dmdeduc2 dmdhhsiz,
+subgroup,ridreth1,age_sex_sub2,age_group
+retinol_binding_protein,,,rbp
+retinol_binding_protein_unit,,,umol/l
+retinol_binding_protein_survey_weight,,,
+serum_retinol,lbdviasi,lbdviasi,
+serum_retinol_unit,umol/l,umol/l,
+serum_retinol_survey_weight,retinol_weight,retinol_weight,
+rbc_folate,rbc_folate,rbc_folate,
+rbc_folate_unit,nmol/l,nmol/l,
+rbc_folate_survey_weight,folate_weight,folate_weight,
+serum_folate,serum_folate,serum_folate,
+serum_folate_unit,nmol/l,nmol/l,
+serum_folate_survey_weight,folate_weight,folate_weight,
+serum_b12,lbdb12si,lbdb12si,
+serum_b12_unit,pmol/l,pmol/l,
+serum_b12_survey_weight,b12_weight,b12_weight,
+urine_iodine,urxuio,urxuio,
+urine_iodine_unit,ng/ml,ng/ml,
+urine_iodine_survey_weight,iodine_weight,iodine_weight,
+serum_zinc,lbdsznsi,lbdsznsi,
+serum_zinc_unit,umol/l,umol/l,
+serum_zinc_survey_weight,zinc_weight,zinc_weight,
+serum_ferritin,lbdfersi,lbdfersi,sf
+serum_ferritin_unit,ug/l,ug/l,ug/l
+serum_ferritin_survey_weight,iron_weight,iron_weight,
+hemoglobin,,,
+hemoglobin_unit,,,
+hemoglobin_survey_weight,,,
+transferrin_receptor,lbxtfr,lbxtfr,stfr
+transferrin_receptor_unit,mg/l,mg/l,mg/l
+transferrin_receptor_survey_weight,iron_weight,iron_weight,
+crp,,,crp
+crp_unit,,,mg/L
+crp_survey_weight,,,
+high_sensitive_crp,,,
+high_sensitive_crp_unit,,,
+high_sensitive_crp_survey_weight,,,
+agp,,,agp
+agp_unit,,,g/L 
+agp_survey_weight,,,
+Note,,,
+hdl,,,
+hdl_unit,,,
+hdl_survey_weight,,,

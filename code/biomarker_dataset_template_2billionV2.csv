@@ -1,0 +1,65 @@
+﻿information,BioData1,bioData2,bioData3
+country,Kenya,USA,Ethiopia
+country_code,KEN,USA,ETH
+survey_year,2010,2003-2006,2015
+complex_survey_design_yes_no,NO,Yes,yes
+study_design,single-site,Multiple-Stage,multistage
+data,kenya_data.sas7bdat,brinda_us2006w_20210225.sas7bdat,EthiopiaMNS_WRA.dta
+directory,~/git/2billion/SAMBA/raw_data,~/git/2billion/SAMBA/raw_data,~/git/2billion/SAMBA/raw_data
+id,brinda_id,ori_id,
+strata,,strata,Region_ID
+PSU,,cluster,EA_ID
+PSU_ID_nested_in_strata ID_yes_no,,YES,no
+sex_var,sex,sex,Gender
+male_value,1,1,1
+age,age_mo,age_yr,Age_Year
+age_unit,month,year,year
+pregnancy_var,,,WRAWCurrentlyPregnant
+pregnancy_value,,,1
+lactating_var,,lactating,
+lactating_value,,1,
+covariates,,ethnic hhsize asset ncigarette smoke mstatus menstr tpreg everbirth a_bmi HHEDU wt ht muac,
+subgroup,age_group,ethnic,
+retinol_binding_protein,rbp,,
+retinol_binding_protein_unit,umol/l,,
+retinol_binding_protein_survey_weight,,,
+serum_retinol,,sr,Retinol
+serum_retinol_unit,,umol/L,umol/L
+serum_retinol_survey_weight,,weight_sr,sweight
+rbc_folate,,rbcf,
+rbc_folate_unit,,nmol/L,
+rbc_folate_survey_weight,,weight_rbcf,
+serum_folate,,sfo                                                                                                          ,Serum_Folate
+serum_folate_unit,,nmol/L,nmol/L
+serum_folate_survey_weight,,weight_sfo,sweight
+serum_b12,,vitb12,
+serum_b12_unit,,pmol/L,
+serum_b12_survey_weight,,weight_vitb12,
+urine_iodine,,iod,
+urine_iodine_unit,,ug/L,
+urine_iodine_survey_weight,,weight_iod ,
+serum_zinc,,,
+serum_zinc_unit,,,
+serum_zinc_survey_weight,,,
+serum_ferritin,sf,sf,FERR
+serum_ferritin_unit,ug/l,ug/l,ug/l
+serum_ferritin_survey_weight,,weight_sf,sweight
+hemoglobin,,hb,
+hemoglobin_unit,,g/L  ,
+hemoglobin_survey_weight,,weight_hb,
+transferrin_receptor,stfr,stfr,
+transferrin_receptor_unit,mg/l,mg/l,
+transferrin_receptor_survey_weight,,weight_stfr,
+serum_vitaminD,,vitd ,
+serum_vitaminD_unit,,nmol/L,
+serum_vitaminD_survey_weight,,weight_vitd ,
+crp,crp,crp ,CRP
+crp_unit,mg/L,mg/L,mg/L
+crp_survey_weight,,weight_crp,sweight
+high_sensitive_crp,,,
+high_sensitive_crp_unit,,,
+high_sensitive_crp_survey_weight,,,
+agp,agp,,AGP
+agp_unit,g/L ,,g/L
+agp_survey_weight,,,sweight
+Note,,WRA,WRA
