@@ -95,10 +95,3 @@ USA,USA,2003-2006,Multiple-Stage,urine_iodine,ug/l,ethnic,2,42,          NA,5.82
 USA,USA,2003-2006,Multiple-Stage,urine_iodine,ug/l,ethnic,3,438,          NA,4.35,,0.5,179.38, 7.29,115.64,107.02,124.97,30.72,3.47,61.86, 3.12,122.66, 7.28,229.98,13.68,373.44, 28.06
 USA,USA,2003-2006,Multiple-Stage,urine_iodine,ug/l,ethnic,4,320,          NA,4.32,,2.0,160.86,10.68,123.28,109.16,139.23,49.42,6.85,83.11, 6.16,123.14, 7.61,186.51,12.42,315.92, 32.53
 USA,USA,2003-2006,Multiple-Stage,urine_iodine,ug/l,ethnic,5,53,1.380996e+32,6.33,,1.1,137.44,15.55,101.72, 80.54,128.48,28.25,5.99,62.76,14.51, 97.45,12.09,170.47,42.27,320.37, 44.81
-ETH,Ethiopia,2015,multistage,serum_folate,nmol/l,overall,overall,1670,NA,40.20,1.43,NA,14.96,0.40,12.10,11.61,12.61,5.60,0.22,8.14,0.16,11.47,0.30,18.04,0.50,27.00,1.22
-ETH,Ethiopia,2015,multistage,serum_retinol,umol/l,overall,overall,1659,NA,4.72,0.62,NA,1.43,0.02,1.35,1.32,1.39,0.86,0.02,1.11,0.02,1.41,0.02,1.73,0.02,2.02,0.02
-ETH,Ethiopia,2015,multistage,serum_retinol_adj,umol/l,overall,overall,1659,NA,4.72,0.62,NA,1.43,0.02,1.35,1.32,1.39,0.86,0.02,1.11,0.02,1.41,0.02,1.73,0.02,2.02,0.02
-ETH,Ethiopia,2015,multistage,serum_ferritin,ug/l,overall,overall,1655,NA,9.70,0.77,NA,71.59,1.56,51.73,49.28,54.30,15.10,0.79,31.79,1.33,57.79,1.66,94.48,2.55,138.35,4.49
-ETH,Ethiopia,2015,multistage,serum_ferritin_adj,ug/l,overall,overall,1655,NA,11.10,0.80,NA,65.78,1.40,47.80,45.55,50.17,13.95,0.80,29.81,1.17,54.17,1.57,86.45,1.98,129.42,4.27
-ETH,Ethiopia,2015,multistage,crp,mg/l,overall,overall,1651,NA,13.37,0.83,NA,2.42,0.12,0.82,0.77,0.88,0.17,0.01,0.32,0.01,0.68,0.02,2.11,0.10,6.43,0.48
-ETH,Ethiopia,2015,multistage,agp,g/l,overall,overall,1653,NA,24.10,1.11,NA,0.84,0.01,0.77,0.75,0.79,0.47,0.01,0.61,0.01,0.76,0.01,0.99,0.02,1.25,0.02

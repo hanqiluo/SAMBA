@@ -5,7 +5,7 @@ survey_year,2010,2003-2006,2015
 complex_survey_design_yes_no,NO,Yes,yes
 study_design,single-site,Multiple-Stage,multistage
 data,kenya_data.sas7bdat,brinda_us2006w_20210225.sas7bdat,EthiopiaMNS_WRA.dta
-directory,~/git/2billion/SAMBA/raw_data,~/git/2billion/SAMBA/raw_data,~/git/2billion/SAMBA/raw_data
+directory,~/git/SAMBA/raw_data,~/git/SAMBA/raw_data,~/git/SAMBA/raw_data
 id,brinda_id,ori_id,
 strata,,strata,Region_ID
 PSU,,cluster,EA_ID

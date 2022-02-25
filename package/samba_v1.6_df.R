@@ -210,13 +210,13 @@ samba <- function(biomarker_dataset_template,
         rm(char_values)
         
         # make sure all the numeric values were recorded into numeric values
-        numeric_var <- c("male_value", "pregnancy_value", "lactating_value")
+        #numeric_var <- c("male_value", "pregnancy_value", "lactating_value")
         
-        sapply(numeric_var, function(x) {
-            if(exists(numeric_var, temp_template2)) {
-                temp_template2[, x] <<- as.numeric(temp_template2[, x])}}) %>%
-            invisible()
-        rm(numeric_var)
+        #sapply(numeric_var, function(x) {
+        #    if(exists(numeric_var, temp_template2)) {
+        #        temp_template2[, x] <<- as.numeric(temp_template2[, x])}}) %>%
+        #    invisible()
+        #rm(numeric_var)
         
         # if a biomarker variable is specified, its unit must be specified; also the age variable
         mapply(function(x, y) {
@@ -631,7 +631,7 @@ samba <- function(biomarker_dataset_template,
                         select(-log_biomarker, -mean),
             
                     # percentiles 
-                    svyquantile(~biomarker,  mydesign, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = T) %>%
+                    oldsvyquantile(~biomarker,  mydesign, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = T) %>%
                         as.data.frame() %>%
                         mutate(p10 = format(round(`0.1`,  digits = 2), nsmall = 2), 
                                p25 = format(round(`0.25`, digits = 2), nsmall = 2), 
@@ -640,7 +640,7 @@ samba <- function(biomarker_dataset_template,
                                p90 = format(round(`0.9`,  digits = 2), nsmall = 2)) %>%
                         select(-`0.1`, -`0.25`, -`0.5`, -`0.75`, -`0.9`),
                     
-                    svyquantile(~biomarker,  mydesign, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = T, ci = T) %>%
+                    oldsvyquantile(~biomarker,  mydesign, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = T, ci = T) %>%
                         SE() %>%
                         t() %>%
                         as.data.frame() %>%
@@ -695,7 +695,7 @@ samba <- function(biomarker_dataset_template,
     
                 # percentiles
                 percentiles <- 
-                    svyby(~biomarker, ~subgroup, mydesign, svyquantile, quantiles =  c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = T, ci = TRUE,
+                    svyby(~biomarker, ~subgroup, mydesign, oldsvyquantile, quantiles =  c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = T, ci = TRUE,
                           drop.empty.groups = FALSE) %>%
                     mutate(p10 =    format(round(`0.1`,  digits = 2), nsmall = 2), 
                            p10_se = format(round(se.0.1, digits = 2), nsmall = 2),
