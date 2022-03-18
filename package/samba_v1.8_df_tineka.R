@@ -1,4 +1,4 @@
-
+# Main SAMBA function
 samba <- function(biomarker_dataset_template,
                   no_biodata,
                   save_directory,
@@ -146,6 +146,7 @@ samba <- function(biomarker_dataset_template,
   print(paste0("-------------Analysis of all biomarker dataset(s) is complete-------------"))
 }
 
+# All subfunctions within the main SAMBA function
 
 load_templates <- function(biomarker_dataset_template, biomarker_cutoff_template, save_directory){
   # load the template  
