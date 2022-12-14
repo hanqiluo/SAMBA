@@ -44,9 +44,6 @@ serum_zinc_survey_weight,,,
 serum_ferritin,sf,sf,FERR
 serum_ferritin_unit,ug/l,ug/l,ug/l
 serum_ferritin_survey_weight,,weight_sf,sweight
-hemoglobin,,hb,
-hemoglobin_unit,,g/L  ,
-hemoglobin_survey_weight,,weight_hb,
 transferrin_receptor,stfr,stfr,
 transferrin_receptor_unit,mg/l,mg/l,
 transferrin_receptor_survey_weight,,weight_stfr,
