@@ -1,0 +1,672 @@
+---
+title: "**SAMBA replicate**"
+author: "BRINDA data management team"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 3
+    keep_md: true
+  always_allow_html: true
+  word_document:
+    toc: yes
+  html_document:
+    df_print: paged
+    number_sections: yes
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+
+lot: true
+lot-title: "Tables"
+lof: true
+lof-title: "Figures"
+#classoption: landscape
+header-includes:
+- \usepackage{titling}
+- \pretitle{\begin{center}\LARGE\includegraphics[width=12cm]{logo.png}\\[\bigskipamount]}
+- \posttitle{\end{center}}
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{xcolor}
+- \usepackage{colortbl}
+- \usepackage{float}
+- \usepackage{lscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+---
+<style>
+.main-container {
+    max-width: 940px;
+    margin-left: 0;
+    margin-right: auto;
+}
+
+page-break-inside: avoid;
+
+.table-hover > tbody > tr:hover { 
+  background-color: #fee8c8;
+}
+</style>
+<p>&nbsp;</p>
+---------------------------------------
+
+```{r load_package, echo = FALSE, warning = FALSE, message = FALSE}
+
+if(!("pacman" %in% installed.packages()[,"Package"])) {
+    install.packages("pacman", dependencies = TRUE)
+}
+library(pacman,
+        kableExtra)
+
+pacman::p_load(
+    knitr,
+    kableExtra,
+    dplyr,
+    readxl,
+    stringr,
+    tidyr,
+    haven,
+    ggplot2,
+    cowplot, 
+    gridExtra, 
+    grid,
+    purrr,
+    lme4,
+    lmerTest,
+    broom.mixed,
+    DescTools,
+    data.table, 
+    survey,
+    metafor,
+    plotrix,
+    bookdown, 
+    BRINDA,
+    jtools,
+    plotrix,
+    forcats,
+    tibble,
+    sas7bdat
+)
+library(plyr, include.only = c('rbind.fill')) 
+options(kableExtra.latex.load_packages = T)
+options(knitr.duplicate.label = 'allow')
+
+#
+# Load supporting packages
+#
+source("/Users/jgeng8/Desktop/BRINDA/SAMBA/brinda_analysis_support_other.R")
+```
+
+```{r load_data, echo = FALSE, warning = FALSE, message = FALSE}
+PSC <- read_dta("/Users/jgeng8/Desktop/BRINDA/Harmonization/Data release/Release_to_Fanny/new_master_data/master_data_psc_20221102.dta") |>
+  mutate(country_year = paste0(country, "(", field_date, ")"),
+         no = 1:n())
+
+WRA <- read_dta("/Users/jgeng8/Desktop/BRINDA/Harmonization/Data release/Release_to_Fanny/new_master_data/master_data_wra_20221102.dta") |>
+  mutate(country_year = paste0(country, "(", field_date, ")"),
+         no = 1:n())
+```
+
+\clearpage
+# Hemoglobin
+```{r hbadjust, echo = FALSE, warning = FALSE, message = FALSE}
+PSC_hb <- PSC |>
+  filter(!is.na(hbadjust)) |>
+  mutate(hb_def = ifelse(hbadjust < 120, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "hbadjust")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "hbadjust", weight = "weight_hb", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "hbadjust", weight = "weight_hb", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "hb_def", weight = "weight_hb", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+
+WRA_hb <- WRA |>
+  filter(!is.na(hbadjust)) |>
+  mutate(hb_def = ifelse(hbadjust < 120, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "hbadjust")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "hbadjust", weight = "weight_hb", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "hbadjust", weight = "weight_hb", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "hb_def", weight = "weight_hb", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+current_colnames_summary <- c("Survey (year)", "n", "Mean (95% CI)", "IQR", "Deficiency (95% CI)")
+
+opts <- options(knitr.kable.NA = "")
+
+rbind.fill(PSC_hb, WRA_hb)  |>
+   knitr::kable(col.names = current_colnames_summary,
+                      booktabs = T,
+                      centering = T,
+                      align = c("l", "c", "c", "c", "c"),
+                       caption = paste0("Descriptive statistics of hemoglobin (g/L) in preschool children and women of reproductive age by country (year)")) |>
+   row_spec(0, bold = TRUE) |>
+   pack_rows("Preschool children", 1, 
+              nrow(PSC_hb)) |>
+   pack_rows("Women of reproductive age", 
+              nrow(PSC_hb) + 1, 
+              nrow(WRA_hb) + nrow(PSC_hb)) |>
+    kable_styling(latex_options=c("striped",  "hold_position", "scale_down")) |>
+      footnote(symbol = c("Hemoglobin deficiency is defined as < 120 g/L."),
+           fixed_small_size = TRUE,
+           threeparttable = TRUE,
+           footnote_as_chunk = TRUE)
+
+
+
+```
+
+\clearpage
+# Serum Ferritin
+
+```{r sf, echo = FALSE, warning = FALSE, message = FALSE}
+PSC_sf <- PSC |>
+  filter(!is.na(sf)) |>
+  mutate(def_sf = ifelse(sf < 12, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sf")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sf", weight = "weight_sf", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sf", weight = "weight_sf", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sf", weight = "weight_sf", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+
+WRA_sf <- WRA |>
+  filter(!is.na(sf)) |>
+  mutate(def_sf = ifelse(sf < 15, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sf")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sf", weight = "weight_sf", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sf", weight = "weight_sf", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sf", weight = "weight_sf", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+current_colnames_summary <- c("Survey (year)", "n", "Mean (95% CI)", "IQR", "Deficiency (95% CI)")
+
+opts <- options(knitr.kable.NA = "")
+
+rbind.fill(PSC_sf, WRA_sf)  |>
+      knitr::kable(col.names = current_colnames_summary,
+                      booktabs = T,
+                      centering = T,
+                      align = c("l", "c", "c", "c", "c"),
+                       caption = paste0("Descriptive statistics of ferritin (µg/L) in preschool children and women of reproductive age by country (year)")) |>
+   row_spec(0, bold = TRUE) |>
+   pack_rows("Preschool children", 1, 
+              nrow(PSC_sf)) |>
+   pack_rows("Women of reproductive age", 
+              nrow(PSC_sf) + 1, 
+              nrow(WRA_sf) +  nrow(PSC_sf)) |>
+    kable_styling(latex_options=c("striped",  "hold_position", "scale_down")) |>
+        footnote(symbol = c("Iron deficiency is defined as ferritin < 12 µg/L among preschool children; Hemoglobin deficiency is defined as ferritin < 15 µg/L among women of reproductive age."),
+           fixed_small_size = TRUE,
+           threeparttable = TRUE,
+           footnote_as_chunk = TRUE)
+
+
+```
+
+\clearpage
+# BRINDA Inflammation Adjusted Serum Ferritin
+```{r sf-adjust, echo = FALSE, warning = FALSE, message = FALSE}
+# PSC
+psc_sf_inclusion_data <-
+  PSC |>
+  filter(!is.na(sf) & (!is.na(agp) | !is.na(crp))) %>%   
+  group_by(country_year) %>%
+  mutate(half_min_sf = min(sf[sf > 0], na.rm = T) * 0.5,
+         sf = ifelse(sf == 0, half_min_sf, sf),
+         half_min_agp = min(agp[agp > 0], na.rm = T) * 0.5,
+         agp = ifelse(agp == 0, half_min_agp, agp),
+         half_min_crp = min(crp[crp > 0], na.rm = T) * 0.5,
+         crp = ifelse(crp == 0, half_min_crp, crp)) |>
+  mutate(no = 1:n(),
+         no_agp = length(unique(no[!is.na(agp) & !is.na(sf)])),
+         no_crp = length(unique(no[!is.na(crp) & !is.na(sf)]))) %>%
+  mutate(agp = ifelse(no_agp < 100, NA, agp),
+         crp = ifelse(no_crp < 100, NA, crp),
+         weight_agp = ifelse(is.na(weight_agp) & !is.na(weight_crp), weight_crp, weight_agp))  |>
+  ungroup() |>
+  filter((!is.na(agp) | !is.na(crp)) & !is.na(sf)) |>
+  group_by(country_year) |>
+  mutate(sample_size = n(), 
+         category = case_when(sum(is.na(agp)) == sample_size & sum(is.na(crp)) != sample_size ~ "Only CRP", 
+                              sum(is.na(crp)) == sample_size & sum(is.na(agp)) != sample_size ~ "Only AGP", 
+                              sum(is.na(crp)) != sample_size & sum(is.na(agp)) != sample_size ~ "Both AGP & CRP")) |>
+  ungroup()
+
+# Only AGP adjustment
+psc_sf_agp <- 
+    psc_sf_inclusion_data |>
+    filter(category == "Only AGP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sf_adj_agp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             ferritin_varname = sf, 
+                                             agp_varname = agp,
+                                             population = PSC,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sf_adj_agp)) |>
+    mutate(sf_adj      = sf_adj, 
+           def_sf = ifelse(sf_adj < 12, 1, 0))  
+
+# Only CRP adjustment
+psc_sf_crp <- 
+    psc_sf_inclusion_data |>
+    filter(category == "Only CRP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sf_adj_crp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             ferritin_varname = sf, 
+                                             crp_varname = crp,
+                                             population = PSC,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sf_adj_crp)) |>
+    mutate(sf_adj      = sf_adj, 
+           def_sf = ifelse(sf_adj < 12, 1, 0)) 
+
+# Both AGP and CRP adjustment
+psc_sf_agp_crp <- 
+    psc_sf_inclusion_data |>
+    filter(category == "Both AGP & CRP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sf_adj_agp_crp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             ferritin_varname = sf, 
+                                             agp_varname = agp,
+                                             crp_varname = crp,
+                                             population = PSC,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sf_adj_agp_crp)) |>
+    mutate(sf_adj      = sf_adj, 
+           def_sf = ifelse(sf_adj < 12, 1, 0))  
+        
+psc_sf <- 
+    rbind(psc_sf_agp,
+          psc_sf_crp,
+          psc_sf_agp_crp)
+
+# WRA
+wra_sf_inclusion_data <-
+  WRA |>
+  filter(!is.na(sf) & (!is.na(agp) | !is.na(crp))) %>%   
+  group_by(country_year) %>%
+  mutate(half_min_sf = min(sf[sf > 0], na.rm = T) * 0.5,
+         sf = ifelse(sf == 0, half_min_sf, sf),
+         half_min_agp = min(agp[agp > 0], na.rm = T) * 0.5,
+         agp = ifelse(agp == 0, half_min_agp, agp),
+         half_min_crp = min(crp[crp > 0], na.rm = T) * 0.5,
+         crp = ifelse(crp == 0, half_min_crp, crp)) |>
+  mutate(no = 1:n(),
+         no_agp = length(unique(no[!is.na(agp) & !is.na(sf)])),
+         no_crp = length(unique(no[!is.na(crp) & !is.na(sf)]))) %>%
+  mutate(agp = ifelse(no_agp < 100, NA, agp),
+         crp = ifelse(no_crp < 100, NA, crp),
+         weight_agp = ifelse(is.na(weight_agp) & !is.na(weight_crp), weight_crp, weight_agp))  |>
+  ungroup() |>
+  filter((!is.na(agp) | !is.na(crp)) & !is.na(sf)) |>
+  group_by(country_year) |>
+  mutate(sample_size = n(), 
+         category = case_when(sum(is.na(agp)) == sample_size & sum(is.na(crp)) != sample_size ~ "Only CRP", 
+                              sum(is.na(crp)) == sample_size & sum(is.na(agp)) != sample_size ~ "Only AGP", 
+                              sum(is.na(crp)) != sample_size & sum(is.na(agp)) != sample_size ~ "Both AGP & CRP")) |>
+  ungroup()
+
+
+# Only CRP adjustment
+wra_sf_crp <- 
+    wra_sf_inclusion_data |>
+    filter(category == "Only CRP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sf_adj_crp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             ferritin_varname = sf, 
+                                             crp_varname = crp,
+                                             population = WRA,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sf_adj_crp)) |>
+    mutate(sf_adj      = sf_adj, 
+           def_sf = ifelse(sf_adj < 15, 1, 0)) 
+
+# Both AGP and CRP adjustment
+wra_sf_agp_crp <- 
+    wra_sf_inclusion_data |>
+    filter(category == "Both AGP & CRP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sf_adj_agp_crp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             ferritin_varname = sf, 
+                                             agp_varname = agp,
+                                             crp_varname = crp,
+                                             population = WRA,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sf_adj_agp_crp)) |>
+    mutate(sf_adj      = sf_adj, 
+           def_sf = ifelse(sf_adj < 15, 1, 0))  
+        
+wra_sf <- 
+    rbind(wra_sf_crp,
+          wra_sf_agp_crp)
+
+# adjusted ferritin summary
+PSC_sf_adj <- psc_sf |>
+  filter(!is.na(sf_adj)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sf_adj")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sf_adj", weight = "weight_sf", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sf_adj", weight = "weight_sf", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sf", weight = "weight_sf", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+
+WRA_sf_adj <- wra_sf |>
+  filter(!is.na(sf_adj)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sf_adj")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sf_adj", weight = "weight_sf", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sf_adj", weight = "weight_sf", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sf", weight = "weight_sf", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+current_colnames_summary <- c("Survey (year)", "n", "Mean (95% CI)", "IQR", "Deficiency (95% CI)")
+
+opts <- options(knitr.kable.NA = "")
+
+rbind.fill(PSC_sf, WRA_sf)  |>
+   knitr::kable(col.names = current_colnames_summary,
+                      booktabs = T,
+                      centering = T,
+                      align = c("l", "c", "c", "c", "c"),
+                       caption = paste0("Descriptive statistics of BRINDA inflammation adjusted ferritin (µg/L) in preschool children and women of reproductive age by country (year)")) |>
+   row_spec(0, bold = TRUE) |>
+   pack_rows("Preschool children", 1, 
+              nrow(PSC_sf_adj)) |>
+   pack_rows("Women of reproductive age", 
+              nrow(PSC_sf_adj) + 1, 
+              nrow(WRA_sf_adj) + nrow(PSC_sf_adj)) |>
+    kable_styling(latex_options=c("striped",  "hold_position", "scale_down")) |>
+          footnote(symbol = c("Iron deficiency is defined as BRINDA inflammation adjusted ferritin < 12 µg/L among preschool children; Hemoglobin deficiency is defined as BRINDA inflammation adjusted ferritin < 15 µg/L among women of reproductive age."),
+           fixed_small_size = TRUE,
+           threeparttable = TRUE,
+           footnote_as_chunk = TRUE)
+
+```
+
+\clearpage
+# Serum Retinol
+
+```{r sr, echo = FALSE, warning = FALSE, message = FALSE}
+PSC_sr <- PSC |>
+  filter(!is.na(sr)) |>
+  mutate(def_sr = ifelse(sr < 0.7, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sr")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sr", weight = "weight_sr", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sr", weight = "weight_sr", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sr", weight = "weight_sr", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+
+WRA_sr <- WRA |>
+  filter(!is.na(sr)) |>
+  mutate(def_sr = ifelse(sr < 0.7, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sr")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sr", weight = "weight_sr", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sr", weight = "weight_sr", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sr", weight = "weight_sr", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+current_colnames_summary <- c("Survey (year)", "n", "Mean (95% CI)", "IQR", "Deficiency (95% CI)")
+
+opts <- options(knitr.kable.NA = "")
+
+rbind.fill(PSC_sr, WRA_sr)  |>
+      knitr::kable(col.names = current_colnames_summary,
+                      booktabs = T,
+                      centering = T,
+                      align = c("l", "c", "c", "c", "c"),
+                       caption = paste0("Descriptive statistics of retinol (µmol/L ) in preschool children and women of reproductive age by country (year)")) |>
+   row_spec(0, bold = TRUE) |>
+   pack_rows("Preschool children", 1, 
+              nrow(PSC_sr)) |>
+   pack_rows("Women of reproductive age", 
+              nrow(PSC_sr) + 1, 
+              nrow(WRA_sr) +  nrow(PSC_sr)) |>
+    kable_styling(latex_options=c("striped",  "hold_position", "scale_down")) |>
+            footnote(symbol = c("Vitamin A deficiency is defined as < 0.7 µmol/L."),
+           fixed_small_size = TRUE,
+           threeparttable = TRUE,
+           footnote_as_chunk = TRUE)
+```
+
+\clearpage
+# BRINDA Inflammation Adjusted Serum Retinol for PSC
+```{r sr-adjust, echo = FALSE, warning = FALSE, message = FALSE}
+# PSC
+psc_sr_inclusion_data <-
+  PSC |>
+  filter(!is.na(sr) & (!is.na(agp) | !is.na(crp))) %>%   
+  group_by(country_year) %>%
+  mutate(half_min_sr = min(sr[sr > 0], na.rm = T) * 0.5,
+         sr = ifelse(sr == 0, half_min_sr, sr),
+         half_min_agp = min(agp[agp > 0], na.rm = T) * 0.5,
+         agp = ifelse(agp == 0, half_min_agp, agp),
+         half_min_crp = min(crp[crp > 0], na.rm = T) * 0.5,
+         crp = ifelse(crp == 0, half_min_crp, crp)) |>
+  mutate(no = 1:n(),
+         no_agp = length(unique(no[!is.na(agp) & !is.na(sr)])),
+         no_crp = length(unique(no[!is.na(crp) & !is.na(sr)]))) %>%
+  mutate(agp = ifelse(no_agp < 100, NA, agp),
+         crp = ifelse(no_crp < 100, NA, crp),
+         weight_agp = ifelse(is.na(weight_agp) & !is.na(weight_crp), weight_crp, weight_agp))  |>
+  ungroup() |>
+  filter((!is.na(agp) | !is.na(crp)) & !is.na(sr)) |>
+  group_by(country_year) |>
+  mutate(sample_size = n(), 
+         category = case_when(sum(is.na(agp)) == sample_size & sum(is.na(crp)) != sample_size ~ "Only CRP", 
+                              sum(is.na(crp)) == sample_size & sum(is.na(agp)) != sample_size ~ "Only AGP", 
+                              sum(is.na(crp)) != sample_size & sum(is.na(agp)) != sample_size ~ "Both AGP & CRP")) |>
+  ungroup()
+
+# Only AGP adjustment
+psc_sr_agp <- 
+    psc_sr_inclusion_data |>
+    filter(category == "Only AGP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sr_adj_agp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             retinol_varname = sr, 
+                                             agp_varname = agp,
+                                             population = PSC,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sr_adj_agp)) |>
+    mutate(sr_adj      = sr_adj, 
+           def_sr = ifelse(sr_adj < 0.7, 1, 0))  
+
+# Only CRP adjustment
+psc_sr_crp <- 
+    psc_sr_inclusion_data |>
+    filter(category == "Only CRP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sr_adj_crp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             retinol_varname = sr, 
+                                             crp_varname = crp,
+                                             population = PSC,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sr_adj_crp)) |>
+    mutate(sr_adj      = sr_adj, 
+           def_sr = ifelse(sr_adj < 0.7, 1, 0)) 
+
+# Both AGP and CRP adjustment
+psc_sr_agp_crp <- 
+    psc_sr_inclusion_data |>
+    filter(category == "Both AGP & CRP") |>
+    group_by(country_year) |>
+    nest() |>
+    mutate(sr_adj_agp_crp = map(.x = data, 
+                                .f = ~BRINDA(dataset = .x,
+                                             retinol_varname = sr, 
+                                             agp_varname = agp,
+                                             crp_varname = crp,
+                                             population = PSC,
+                                             crp_ref_value_manual = ,
+                                             agp_ref_value_manual = ))) |>
+    dplyr::select(-data) |>
+    unnest(col = c(sr_adj_agp_crp)) |>
+    mutate(sr_adj      = sr_adj, 
+           def_sr = ifelse(sr_adj < 0.7, 1, 0))  
+        
+psc_sr <- 
+    rbind(psc_sr_agp,
+          psc_sr_crp,
+          psc_sr_agp_crp)
+
+
+
+# adjusted ferritin summary
+PSC_sr_adj <- psc_sr |>
+  filter(!is.na(sr_adj)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "sr_adj")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "sr_adj", weight = "weight_sr", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "sr_adj", weight = "weight_sr", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "def_sr", weight = "weight_sr", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+current_colnames_summary <- c("Survey (year)", "n", "Mean (95% CI)", "IQR", "Deficiency (95% CI)")
+
+opts <- options(knitr.kable.NA = "")
+
+PSC_sr_adj |>
+  knitr::kable(col.names = current_colnames_summary,
+               booktabs = T,
+               centering = T,
+               align = c("l", "c", "c", "c", "c"),
+               caption = paste0("Descriptive statistics of BRINDA inflammation adjusted retinol (µmol/L ) in preschool children by country (year)")) |>
+  row_spec(0, bold = TRUE) |>
+    kable_styling(latex_options=c("striped",  "hold_position", "scale_down")) |>
+              footnote(symbol = c("Vitamin A deficiency is defined as BRINDA inflammation adjusted retinol < 0.7 µmol/L."),
+           fixed_small_size = TRUE,
+           threeparttable = TRUE,
+           footnote_as_chunk = TRUE)
+
+
+```
+
+\clearpage
+# CRP
+
+```{r crp, echo = FALSE, warning = FALSE, message = FALSE}
+PSC_crp <- PSC |>
+  filter(!is.na(crp)) |>
+  mutate(inflammation = ifelse(crp > 5, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "crp")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "crp", weight = "weight_crp", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "crp", weight = "weight_crp", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "inflammation", weight = "weight_crp", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+
+WRA_crp <- WRA |>
+  filter(!is.na(crp)) |>
+  mutate(inflammation = ifelse(crp > 5, 1, 0)) |>
+  group_by(country_year) |>
+  nest() %>%
+  mutate(n = map(.x = data, .f = ~get_sample_size_other(df = .x, variable = "crp")),
+         mean_ci = map(.x = data,  .f = ~get_mean_ci_other(df = .x, variable = "crp", weight = "weight_crp", digit_num = 1)),
+         iqr = map(.x = data,  .f = ~get_iqr_other(df = .x, variable = "crp", weight = "weight_crp", digit_num = 1)),
+         def_ci = map(.x = data, .f = ~get_prop_ci_other(df = .x, variable = "inflammation", weight = "weight_crp", digit_num = 1))) |>
+  dplyr::select(-data) |>
+  unnest(cols = c(n, mean_ci, iqr, def_ci)) |>
+  dplyr::select(country_year, n, mean_ci, iqr, def_ci)
+
+current_colnames_summary <- c("Survey (year)", "n", "Mean (95% CI)", "IQR", "Deficiency (95% CI)")
+
+opts <- options(knitr.kable.NA = "")
+
+rbind.fill(PSC_crp, WRA_crp)  |>
+  knitr::kable(col.names = current_colnames_summary,
+               booktabs = T,
+               centering = T,
+               align = c("l", "c", "c", "c", "c"),
+               caption = paste0("Descriptive statistics of CRP (mg/L) in preschool children and women of reproductive age by country (year)")) |>
+  row_spec(0, bold = TRUE) |>
+  pack_rows("Preschool children", 1, 
+            nrow(PSC_crp)) |>
+  pack_rows("Women of reproductive age", 
+            nrow(PSC_crp) + 1, 
+            nrow(WRA_crp) + nrow(PSC_crp)) |>
+    kable_styling(latex_options=c("striped",  "hold_position", "scale_down")) |>
+                footnote(symbol = c("Inflammation is defined as crp > 5 mg/L."),
+           fixed_small_size = TRUE,
+           threeparttable = TRUE,
+           footnote_as_chunk = TRUE)
+```
